@@ -10,8 +10,10 @@ from kai.actions.chat import execute_chat
 from kai.actions.files import execute_file_op
 from kai.actions.ide import execute_open_ide
 from kai.actions.memory import execute_recall, execute_remember
+from kai.actions.scanner import execute_find_and_open
 from kai.actions.system import execute_system_op
 from kai.actions.timer import execute_timer
+from kai.actions.window_manager import execute_close_app
 from kai.constants import ALLOWED_ACTIONS
 
 
@@ -56,6 +58,10 @@ def execute_action(
         execute_recall(args, memory)
     elif action == "system_op":
         execute_system_op(args, config)
+    elif action == "close_app":
+        execute_close_app(args, config)
+    elif action == "find_and_open":
+        execute_find_and_open(args, config)
 
     return None
 

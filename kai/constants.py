@@ -17,6 +17,8 @@ ALLOWED_ACTIONS = {
     "remember",
     "recall",
     "system_op",
+    "close_app",
+    "find_and_open",
 }
 
 DEFAULT_CONFIG: Dict[str, Any] = {

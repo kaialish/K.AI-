@@ -5,7 +5,9 @@ K.AI - Пакет консольного AI-ассистента для Windows.
 from kai.actions import (
     execute_action,
     execute_chat,
+    execute_close_app,
     execute_file_op,
+    execute_find_and_open,
     execute_open_app,
     execute_open_ide,
     execute_open_url,
@@ -64,6 +66,8 @@ __all__ = [
     "execute_run_app",
     "execute_system_op",
     "execute_timer",
+    "execute_close_app",
+    "execute_find_and_open",
     "ALLOWED_ACTIONS",
     "DEFAULT_CONFIG",
     "KNOWN_APPS",

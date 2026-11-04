@@ -35,6 +35,34 @@ def parse_with_regex(text: str, memory: Dict[str, Any]) -> Optional[Dict[str, An
     if re.search(r"^(выход|выйти|exit|quit|закройся|пока|стоп)$", cleaned):
         return {"action": "exit", "args": {}}
 
+    # Закрытие окон и приложений
+    if re.search(r"^(?:закрой|закрыть)\s+(?:вс[её]\s+кроме|вс[её]\s+окна|вс[её]\s+приложения|вс[её])$", cleaned):
+        return {"action": "close_app", "args": {"target": "все", "all_except_self": True}}
+    m_close = re.search(r"^(?:закрой|закрыть)\s+(.+)$", cleaned)
+    if m_close:
+        tgt = m_close.group(1).strip()
+        if tgt not in ("дверь", "себя"):
+            return {"action": "close_app", "args": {"target": tgt, "all_except_self": False}}
+
+    # Открытие проекта в IDE по умолчанию / последний проект
+    if re.search(
+        r"^(?:открой|запусти)?\s*(?:проект\s+в\s+ide|ide|проект|код|vs\s*code|vscode)$",
+        cleaned,
+    ):
+        return {"action": "open_ide", "args": {}}
+
+    # Поиск и открытие конкретных проектов и файлов на дисках
+    m_proj = re.search(r"^(?:открой|найди(?:\s+и\s+открой)?)\s+проект\s+(.+)$", cleaned)
+    if m_proj:
+        target_proj = m_proj.group(1).strip()
+        if target_proj.lower() not in ("в ide", "в vscode", "в коде"):
+            return {"action": "find_and_open", "args": {"query": target_proj, "as_project": True}}
+        return {"action": "open_ide", "args": {}}
+
+    m_file = re.search(r"^(?:открой|найди(?:\s+и\s+открой)?)\s+файл\s+(.+)$", cleaned)
+    if m_file:
+        return {"action": "find_and_open", "args": {"query": m_file.group(1).strip(), "as_project": False}}
+
     # 2. Таймер
     if "полтора часа" in cleaned:
         return {"action": "timer", "args": {"seconds": 5400, "label": "полтора часа"}}

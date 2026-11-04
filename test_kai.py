@@ -210,6 +210,55 @@ class TestKaiAssistant(unittest.TestCase):
         kai.execute_open_ide({}, self.config)
         mock_popen.assert_called_once()
 
+    # 17. close_app — закрытие конкретного приложения и всех окон
+    @patch("subprocess.run")
+    def test_execute_close_app_specific(self, mock_run):
+        mock_run.return_value.returncode = 0
+        kai.execute_close_app({"target": "telegram", "all_except_self": False}, self.config)
+        mock_run.assert_called_once()
+
+    @patch("kai.actions.window_manager.get_all_visible_windows")
+    @patch("kai.actions.window_manager.close_window_by_hwnd", return_value=True)
+    def test_execute_close_app_all(self, mock_close_win, mock_get_wins):
+        mock_get_wins.return_value = [(101, "Google Chrome", 99999), (102, "Telegram", 99998)]
+        with patch("sys.stdout", new=io.StringIO()) as fake_out:
+            kai.execute_close_app({"target": "все", "all_except_self": True}, self.config)
+            self.assertEqual(mock_close_win.call_count, 2)
+            self.assertIn("сохранён", fake_out.getvalue())
+
+    # 18. find_and_open — сканирование диска и открытие проектов/файлов
+    @patch("kai.actions.scanner.scan_for_project", return_value="K:\\TouBot\\tou_bot")
+    @patch("subprocess.Popen")
+    def test_execute_find_and_open_project(self, mock_popen, mock_scan):
+        kai.execute_find_and_open({"query": "tou_bot", "as_project": True}, self.config)
+        mock_scan.assert_called_once_with("tou_bot")
+        mock_popen.assert_called_once()
+
+    @patch("kai.actions.scanner.scan_for_file", return_value="C:\\Users\\User\\Documents\\resume.pdf")
+    @patch("os.startfile")
+    def test_execute_find_and_open_file(self, mock_startfile, mock_scan):
+        kai.execute_find_and_open({"query": "resume.pdf", "as_project": False}, self.config)
+        mock_scan.assert_called_once_with("resume.pdf")
+        mock_startfile.assert_called_once_with("C:\\Users\\User\\Documents\\resume.pdf")
+
+    # 19. regex fallback для закрытия и умного поиска
+    def test_regex_fallback_close_and_scan(self):
+        res_close_all = kai.parse_with_regex("закрой все окна", self.memory)
+        self.assertEqual(res_close_all["action"], "close_app")
+        self.assertTrue(res_close_all["args"]["all_except_self"])
+
+        res_close_tg = kai.parse_with_regex("закрой телеграм", self.memory)
+        self.assertEqual(res_close_tg["action"], "close_app")
+        self.assertEqual(res_close_tg["args"]["target"], "телеграм")
+
+        res_find_proj = kai.parse_with_regex("открой проект tou_bot", self.memory)
+        self.assertEqual(res_find_proj["action"], "find_and_open")
+        self.assertTrue(res_find_proj["args"]["as_project"])
+
+        res_find_file = kai.parse_with_regex("открой файл resume.pdf", self.memory)
+        self.assertEqual(res_find_file["action"], "find_and_open")
+        self.assertEqual(res_find_file["args"]["query"], "resume.pdf")
+
 
 if __name__ == "__main__":
     unittest.main()
