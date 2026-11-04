@@ -1,0 +1,13 @@
+{
+  "model": "qwen2.5:3b-instruct",
+  "ollama_url": "http://localhost:11434",
+  "ollama_bin": "K:\\Различные установщики\\ollama-windows-amd64\\ollama.exe",
+  "ide_command": "code",
+  "last_project": "",
+  "browser": "chrome",
+  "aliases": {
+    "почта": "https://mail.google.com",
+    "гитхаб": "https://github.com",
+    "ютуб": "https://youtube.com"
+  }
+}
